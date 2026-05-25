@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homie - 家庭网络导航</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1f2b4d;
+      --accent: #0f3460;
+      --accent-light: #e94560;
+      --text-primary: #eaeaea;
+      --text-secondary: #a0a0a0;
+      --border-color: #2a2a4a;
+    }
+    
+    body {
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .hero.is-dark {
+      background: linear-gradient(135deg, var(--bg-dark) 0%, var(--accent) 100%);
+    }
+    
+    .title, .subtitle {
+      color: var(--text-primary) !important;
+    }
+    
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+    
+    .card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(233, 69, 96, 0.15);
+    }
+    
+    .card-content {
+      padding: 1.25rem;
+    }
+    
+    .link-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .link-name {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+    }
+    
+    .link-url {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      word-break: break-all;
+    }
+    
+    .card-footer-item {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    
+    .card-footer-item:hover {
+      color: var(--accent-light);
+      background: transparent;
+    }
+    
+    .button.is-primary {
+      background: var(--accent-light);
+      border: none;
+    }
+    
+    .button.is-primary:hover {
+      background: #ff6b8a;
+    }
+    
+    .button.is-dark {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    
+    .button.is-dark:hover {
+      background: var(--bg-card-hover);
+    }
+    
+    .input, .textarea, .select select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    
+    .input:focus, .textarea:focus, .select select:focus {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+    }
+    
+    .modal-card {
+      background: var(--bg-dark);
+      border-radius: 12px;
+    }
+    
+    .modal-card-head, .modal-card-foot {
+      background: var(--bg-card);
+      border-color: var(--border-color);
+    }
+    
+    .modal-card-title {
+      color: var(--text-primary);
+    }
+    
+    .modal-card-body {
+      background: var(--bg-dark);
+    }
+    
+    .tag {
+      margin-right: 0.25rem;
+    }
+    
+    .scan-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    
+    .category-section {
+      margin-bottom: 2rem;
+    }
+    
+    .category-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent-light);
+      display: inline-block;
+    }
+    
+    .columns {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .column {
+      padding: 0.75rem;
+    }
+    
+    .notification {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    /* Scan results table */
+    .scan-table {
+      width: 100%;
+      background: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .scan-table th {
+      background: var(--accent);
+      color: var(--text-primary);
+      padding: 0.75rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .scan-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .scan-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .scan-table tr:hover td {
+      background: var(--bg-card-hover);
+    }
+    
+    .status-open {
+      color: #48c78e;
+    }
+    
+    .add-to-homie-btn {
+      cursor: pointer;
+      color: var(--accent-light);
+      transition: transform 0.2s;
+    }
+    
+    .add-to-homie-btn:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <section class="hero is-dark">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title is-2">
+          <i class="fas fa-home"></i> Homie
+        </h1>
+        <p class="subtitle is-5 has-text-grey-light">
+          家庭网络导航 · 局域网设备扫描与服务发现
+        </p>
+        <div class="buttons">
+          <button class="button is-primary" id="scanBtn" onclick="startScan()">
+            <span class="icon"><i class="fas fa-radar"></i></span>
+            <span>🔍 扫描网络</span>
+          </button>
+          <button class="button is-dark" onclick="openAddModal()">
+            <span class="icon"><i class="fas fa-plus"></i></span>
+            <span>➕ 添加链接</span>
+          </button>
+          <button class="button is-dark" onclick="openScanResultsModal()">
+            <span class="icon"><i class="fas fa-list"></i></span>
+            <span>📋 扫描结果</span>
+          </button>
+        </div>
+        <div id="scanStatus" class="mt-3" style="display: none;">
+          <span class="scan-status">
+            <i class="fas fa-spinner spinner"></i>
+            <span id="scanStatusText">正在扫描...</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="section">
+    <div class="container">
+      <!-- Links Container -->
+      <div id="linksContainer">
+        <div class="empty-state" id="emptyState">
+          <i class="fas fa-link"></i>
+          <h3 class="title is-4 has-text-grey">暂无链接</h3>
+          <p class="has-text-grey">点击「🔍 扫描网络」自动发现设备，或手动「➕ 添加链接」</p>
+        </div>
+        <div id="linksGrid" class="columns is-multiline" style="display: none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Add/Edit Link Modal -->
+  <div class="modal" id="linkModal">
+    <div class="modal-background" onclick="closeLinkModal()"></div>
+    <div class="modal-card" style="max-width: 500px;">
+      <header class="modal-card-head">
+        <p class="modal-card-title" id="modalTitle">添加链接</p>
+        <button class="delete" aria-label="close" onclick="closeLinkModal()"></button>
+      </header>
+      <section class="modal-card-body">
+        <input type="hidden" id="linkId">
+        <div class="field">
+          <label class="label has-text-white">名称</label>
+          <div class="control">
+            <input class="input" type="text" id="linkName" placeholder="例如：OpenClaw">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label has-text-white">地址 (URL)</label>
+          <div class="control">
+            <input class="input" type="text" id="linkUrl" placeholder="例如：http://192.168.1.100:18789">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label has-text-white">图标 (emoji)</label>
+          <div class="control">
+            <input class="input" type="text" id="linkIcon" placeholder="例如：🔧" maxlength="4">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label has-text-white">分类</label>
+          <div class="control">
+            <div class="select is-fullwidth">
+              <select id="linkCategory">
+                <option value="system">系统</option>
+                <option value="media">媒体</option>
+                <option value="download">下载</option>
+                <option value="development">开发</option>
+                <option value="storage">存储</option>
+                <option value="network">网络</option>
+                <option value="other">其他</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-primary" onclick="saveLink()">
+          <span class="icon"><i class="fas fa-save"></i></span>
+          <span>保存</span>
+        </button>
+        <button class="button is-dark" onclick="closeLinkModal()">取消</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Scan Results Modal -->
+  <div class="modal" id="scanResultsModal">
+    <div class="modal-background" onclick="closeScanResultsModal()"></div>
+    <div class="modal-card" style="max-width: 900px; max-height: 80vh;">
+      <header class="modal-card-head">
+        <p class="modal-card-title">📋 扫描结果</p>
+        <button class="delete" aria-label="close" onclick="closeScanResultsModal()"></button>
+      </header>
+      <section class="modal-card-body" style="overflow-y: auto;">
+        <div id="scanResultsSummary" class="mb-4"></div>
+        <div id="scanResultsTable"></div>
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-primary" onclick="closeScanResultsModal()">关闭</button>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    let links = [];
+    let currentEditId = null;
+
+    // Load links on page load
+    document.addEventListener('DOMContentLoaded', loadLinks);
+
+    async function loadLinks() {
+      try {
+        const res = await fetch(`${API_BASE}/links`);
+        links = await res.json();
+        renderLinks();
+      } catch (err) {
+        console.error('Failed to load links:', err);
+      }
+    }
+
+    function renderLinks() {
+      const grid = document.getElementById('linksGrid');
+      const empty = document.getElementById('emptyState');
+      
+      if (links.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+      
+      empty.style.display = 'none';
+      grid.style.display = 'flex';
+      
+      // Group by category
+      const categories = {
+        system: { title: '⚙️ 系统', items: [] },
+        media: { title: '🎬 媒体', items: [] },
+        download: { title: '📥 下载', items: [] },
+        development: { title: '💻 开发', items: [] },
+        storage: { title: '💾 存储', items: [] },
+        network: { title: '🌐 网络', items: [] },
+        other: { title: '📦 其他', items: [] }
+      };
+      
+      links.forEach(link => {
+        const cat = link.category || 'other';
+        if (!categories[cat]) categories[cat] = { title: '📦 其他', items: [] };
+        categories[cat].items.push(link);
+      });
+      
+      let html = '';
+      Object.entries(categories).forEach(([key, cat]) => {
+        if (cat.items.length === 0) return;
+        html += `
+          <div class="column is-full">
+            <div class="category-section">
+              <h3 class="category-title">${cat.title}</h3>
+              <div class="columns is-multiline">
+                ${cat.items.map(link => `
+                  <div class="column is-4-desktop is-6-tablet">
+                    <div class="card">
+                      <div class="card-content">
+                        <div class="link-icon">${link.icon || '🔗'}</div>
+                        <div class="link-name">${escapeHtml(link.name)}</div>
+                        <div class="link-url">${escapeHtml(link.url)}</div>
+                      </div>
+                      <footer class="card-footer">
+                        <a href="${escapeHtml(link.url)}" target="_blank" class="card-footer-item" title="打开">
+                          <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <a class="card-footer-item" onclick="editLink('${link.id}')" title="编辑">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="card-footer-item" onclick="deleteLink('${link.id}')" title="删除">
+                          <i class="fas fa-trash"></i>
+                        </a>
+                      </footer>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      grid.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function openAddModal() {
+      currentEditId = null;
+      document.getElementById('modalTitle').textContent = '添加链接';
+      document.getElementById('linkId').value = '';
+      document.getElementById('linkName').value = '';
+      document.getElementById('linkUrl').value = '';
+      document.getElementById('linkIcon').value = '';
+      document.getElementById('linkCategory').value = 'other';
+      document.getElementById('linkModal').classList.add('is-active');
+    }
+
+    function editLink(id) {
+      const link = links.find(l => l.id === id);
+      if (!link) return;
+      
+      currentEditId = id;
+      document.getElementById('modalTitle').textContent = '编辑链接';
+      document.getElementById('linkId').value = link.id;
+      document.getElementById('linkName').value = link.name;
+      document.getElementById('linkUrl').value = link.url;
+      document.getElementById('linkIcon').value = link.icon || '';
+      document.getElementById('linkCategory').value = link.category || 'other';
+      document.getElementById('linkModal').classList.add('is-active');
+    }
+
+    function closeLinkModal() {
+      document.getElementById('linkModal').classList.remove('is-active');
+      currentEditId = null;
+    }
+
+    async function saveLink() {
+      const name = document.getElementById('linkName').value.trim();
+      const url = document.getElementById('linkUrl').value.trim();
+      const icon = document.getElementById('linkIcon').value.trim();
+      const category = document.getElementById('linkCategory').value;
+      
+      if (!name || !url) {
+        alert('名称和地址不能为空');
+        return;
+      }
+      
+      const payload = { name, url, icon, category };
+      const method = currentEditId ? 'PUT' : 'POST';
+      const url2 = currentEditId ? `${API_BASE}/links/${currentEditId}` : `${API_BASE}/links`;
+      
+      try {
+        const res = await fetch(url2, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error('Failed to save');
+        
+        closeLinkModal();
+        loadLinks();
+      } catch (err) {
+        console.error('Save failed:', err);
+        alert('保存失败');
+      }
+    }
+
+    async function deleteLink(id) {
+      if (!confirm('确定要删除这个链接吗？')) return;
+      
+      try {
+        const res = await fetch(`${API_BASE}/links/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        loadLinks();
+      } catch (err) {
+        console.error('Delete failed:', err);
+        alert('删除失败');
+      }
+    }
+
+    // Scanning
+    async function startScan() {
+      const btn = document.getElementById('scanBtn');
+      const status = document.getElementById('scanStatus');
+      const statusText = document.getElementById('scanStatusText');
+      
+      btn.disabled = true;
+      status.style.display = 'block';
+      statusText.textContent = '正在扫描局域网...';
+      
+      try {
+        const res = await fetch(`${API_BASE}/scan`, { method: 'POST' });
+        if (!res.ok) throw new Error('Scan failed');
+        
+        // Poll for completion
+        await pollScanStatus();
+      } catch (err) {
+        console.error('Scan error:', err);
+        statusText.textContent = '扫描失败';
+        btn.disabled = false;
+      }
+    }
+
+    async function pollScanStatus() {
+      const statusText = document.getElementById('scanStatusText');
+      
+      while (true) {
+        await new Promise(r => setTimeout(r, 2000));
+        
+        try {
+          const res = await fetch(`${API_BASE}/scan/status`);
+          const data = await res.json();
+          
+          if (!data.scanning) {
+            statusText.textContent = `✅ 扫描完成！发现 ${data.count} 个开放端口`;
+            document.getElementById('scanBtn').disabled = false;
+            
+            // Auto-add discovered services to links
+            if (data.results && data.results.length > 0) {
+              await addDiscoveredServices(data.results);
+            }
+            return;
+          }
+          
+          statusText.textContent = `🔍 正在扫描... 已发现 ${data.count} 个端口`;
+        } catch (err) {
+          console.error('Poll error:', err);
+        }
+      }
+    }
+
+    async function addDiscoveredServices(results) {
+      // Add open ports as links (if not already added)
+      for (const r of results) {
+        const url = `${r.protocol === 'https' ? 'https' : 'http'}://${r.ip}:${r.port}`;
+        const existing = links.find(l => l.url === url);
+        if (existing) continue;
+        
+        const payload = {
+          name: `${r.Service} (${r.ip}:${r.port})`,
+          url: url,
+          icon: getIconForService(r.Service),
+          category: getCategoryForService(r.Service)
+        };
+        
+        try {
+          await fetch(`${API_BASE}/links`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {
+          console.error('Failed to add service:', err);
+        }
+      }
+      
+      loadLinks();
+    }
+
+    function getIconForService(service) {
+      const icons = {
+        'Web': '🌐', 'Web (SSL)': '🔒', 'Web (Alt)': '🌐', 'SSH': '📟',
+        'Plex': '🎬', 'Jellyfin': '🎬', 'Sonarr': '📺', 'Radarr': '🎥',
+        'Transmission': '📥', 'qBittorrent': '📥', 'Jackett': '🔍',
+        'Prowlarr': '🔍', 'Bazarr': '📝', 'OpenClaw': '🦷', 'Home Assistant': '🏠',
+        'Node-RED': '🔧', 'HomeBridge': '🏀', 'Pi-hole': '🛡️',
+        'Nextcloud': '☁️', 'TrueNAS': '💾', 'NFS': '💾', 'SMB': '📁',
+        'Docker': '🐳', 'Portainer': '📦', 'Grafana': '📊', 'Prometheus': '📈',
+        'Alertmanager': '⚠️', 'Uptime Kuma': '⏱️', 'FileBrowser': '📂',
+        'Bookstack': '📚', 'Calibre-Web': '📖', 'Mattermost': '💬',
+        'Jitsi': '📹', 'Mumble': '🎙️', 'Wireguard': '🔐', 'XMPP': '💬',
+        'MySQL': '🐬', 'PostgreSQL': '🐘', 'MongoDB': '🍃', 'Redis': '🔴',
+        'Elasticsearch': '🔎', 'Kibana': '📊', 'RabbitMQ': '🐇',
+        'MQTT': '📡', 'NTP': '⏰', 'DNS': '🌍', 'DHCP': '📡',
+        'CUPS': '🖨️', 'RDP': '🖥️', 'VNC': '🖥️', 'Webmin': '⚙️',
+        'Urbackup': '💾', 'Mylar': '📚', 'Tautulli': '📊', 'Immich': '📷'
+      };
+      return icons[service] || '🔗';
+    }
+
+    function getCategoryForService(service) {
+      const cats = {
+        'Plex': 'media', 'Jellyfin': 'media', 'Sonarr': 'download',
+        'Radarr': 'download', 'Transmission': 'download', 'qBittorrent': 'download',
+        'Jackett': 'download', 'Prowlarr': 'download', 'Bazarr': 'download',
+        'Nextcloud': 'storage', 'TrueNAS': 'storage', 'NFS': 'storage', 'SMB': 'storage',
+        'Urbackup': 'storage', 'Bookstack': 'media', 'Calibre-Web': 'media',
+        'Mylar': 'media', 'Immich': 'media',
+        'Home Assistant': 'system', 'OpenClaw': 'system', 'Webmin': 'system',
+        'Docker': 'system', 'Portainer': 'system',
+        'Grafana': 'development', 'Prometheus': 'development', 'Elasticsearch': 'development',
+        'Node-RED': 'development',
+        'SSH': 'network', 'RDP': 'network', 'VNC': 'network', 'Wireguard': 'network',
+        'Pi-hole': 'network', 'DNS': 'network', 'DHCP': 'network', 'NTP': 'network'
+      };
+      return cats[service] || 'other';
+    }
+
+    async function openScanResultsModal() {
+      try {
+        const res = await fetch(`${API_BASE}/scan/status`);
+        const data = await res.json();
+        
+        const summary = document.getElementById('scanResultsSummary');
+        summary.innerHTML = `
+          <div class="notification">
+            <p><strong>发现 ${data.count} 个开放端口</strong></p>
+            <p class="has-text-grey-light mt-2">
+              ${Object.entries(data.summary || {}).map(([svc, cnt]) => 
+                `<span class="tag is-dark">${svc}: ${cnt}</span>`
+              ).join(' ')}
+            </p>
+          </div>
+        `;
+        
+        const table = document.getElementById('scanResultsTable');
+        if (data.results && data.results.length > 0) {
+          table.innerHTML = `
+            <table class="scan-table">
+              <thead>
+                <tr>
+                  <th>IP 地址</th>
+                  <th>端口</th>
+                  <th>协议</th>
+                  <th>服务</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.results.map(r => `
+                  <tr>
+                    <td>${r.ip}</td>
+                    <td>${r.port}</td>
+                    <td>${r.protocol}</td>
+                    <td>${r.service}</td>
+                    <td><span class="status-open">● 开放</span></td>
+                    <td>
+                      <span class="add-to-homie-btn" onclick="addSingleLink('${r.ip}', ${r.port}, '${r.protocol}', '${r.service}')" title="添加到 Homie">
+                        <i class="fas fa-plus-circle"></i> 添加
+                      </span>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        } else {
+          table.innerHTML = '<p class="has-text-grey">暂无扫描结果，请先执行扫描</p>';
+        }
+        
+        document.getElementById('scanResultsModal').classList.add('is-active');
+      } catch (err) {
+        console.error('Failed to load scan results:', err);
+      }
+    }
+
+    function closeScanResultsModal() {
+      document.getElementById('scanResultsModal').classList.remove('is-active');
+    }
+
+    async function addSingleLink(ip, port, protocol, service) {
+      const url = `${protocol === 'https' ? 'https' : 'http'}://${ip}:${port}`;
+      document.getElementById('linkName').value = service;
+      document.getElementById('linkUrl').value = url;
+      document.getElementById('linkIcon').value = getIconForService(service);
+      document.getElementById('linkCategory').value = getCategoryForService(service);
+      
+      closeScanResultsModal();
+      document.getElementById('linkModal').classList.add('is-active');
+    }
+  </script>
+</body>
+</html>
