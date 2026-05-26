@@ -1,0 +1,11 @@
+services:
+  homie:
+    build: .
+    container_name: homie
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    # Optional: specify a different port via command
+    # command: ["-port", "8080"]
